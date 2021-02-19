@@ -1,5 +1,7 @@
 use crate::tree_util::HufTreeNode;
 use ahash::AHashMap;
+use bitvec::prelude::*;
+use bitvec::slice as bv_slice;
 use std::collections::VecDeque;
 
 pub fn encode(input_data: &[u8]) -> (Vec<HufTreeNode>, Vec<u8>) {
@@ -19,13 +21,13 @@ pub fn encode(input_data: &[u8]) -> (Vec<HufTreeNode>, Vec<u8>) {
         huffman_tree.push(HufTreeNode::new(val, freq, -1, -1));
     }
 
-    huffman_tree.sort_unstable_by_key(|k| k.freq());
+    huffman_tree.sort_unstable_by_key(|k| k.freq);
 
     let mut queue1: VecDeque<i16> = (0..(tree_size as i16)).collect();
     let mut queue2: VecDeque<i16> = VecDeque::with_capacity(tree_size);
 
     let mut j = 0;
-    while queue1.len() + queue2.len() > 1 {
+    while (queue1.len() + queue2.len()) > 1 {
         let (elem1, freq1) = take_less(&mut queue1, &mut queue2, &huffman_tree);
         let (elem2, freq2) = take_less(&mut queue1, &mut queue2, &huffman_tree);
 
@@ -34,6 +36,10 @@ pub fn encode(input_data: &[u8]) -> (Vec<HufTreeNode>, Vec<u8>) {
         queue2.push_back(j);
         j += 1;
     }
+
+    // create lookup table for codewords
+    let mut codewords: BitVec = BitVec::new();
+    let mut lookup_table: AHashMap<u8, &BitPtr> = AHashMap::new();
 
     // encoding original data
 
@@ -48,11 +54,11 @@ fn take_less(
 ) -> (i16, usize) {
     match queue1.front() {
         Some(&i1) => {
-            let freq1 = huffman_tree[i1 as usize].freq();
+            let freq1 = huffman_tree[i1 as usize].freq;
 
             match queue2.front() {
                 Some(&i2) => {
-                    let freq2 = huffman_tree[i2 as usize].freq();
+                    let freq2 = huffman_tree[i2 as usize].freq;
 
                     if freq1 <= freq2 {
                         queue1.pop_front();
@@ -70,7 +76,7 @@ fn take_less(
         }
         None => {
             let i2 = queue2.pop_front().unwrap();
-            let freq2 = huffman_tree[i2 as usize].freq();
+            let freq2 = huffman_tree[i2 as usize].freq;
             (i2, freq2)
         }
     }
