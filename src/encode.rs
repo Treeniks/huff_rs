@@ -39,11 +39,60 @@ pub fn encode(input_data: &[u8]) -> (Vec<HufTreeNode>, Vec<u8>) {
 
     // create lookup table for codewords
     let mut codewords: BitVec = BitVec::new();
-    let mut lookup_table: AHashMap<u8, &BitPtr> = AHashMap::new();
+    let mut lookup_table: AHashMap<u8, &BitSlice> = AHashMap::new();
+
+    traverse_tree(
+        huffman_tree.len() - 1,
+        0,
+        &mut codewords,
+        &mut lookup_table,
+        &huffman_tree,
+    );
 
     // encoding original data
 
     (Vec::new(), Vec::new())
+}
+
+// currently not working
+// see https://stackoverflow.com/questions/66289524/rust-collecting-slices-of-a-vec-in-a-recursive-function
+fn traverse_tree<'a>(
+    cur_index: usize,
+    height: i16,
+    codewords: &'a mut bitvec::prelude::BitVec,
+    lookup_table: &mut AHashMap<u8, &'a BitSlice>,
+    huffman_tree: &[HufTreeNode],
+) {
+    let cur_node = &huffman_tree[cur_index];
+
+    // if the left child is -1, we reached a leaf
+    if cur_node.left == -1 {
+        let cur_sequence = &codewords[(codewords.len() - 1 - height as usize)..];
+        lookup_table.insert(cur_node.val, cur_sequence);
+        return;
+    }
+
+    // save the current sequence so we can traverse to the right afterwards
+    let mut cur_sequence = codewords[(codewords.len() - 1 - height as usize)..].to_bitvec();
+    codewords.push(false);
+    traverse_tree(
+        cur_node.left as usize,
+        height + 1,
+        codewords, // mutable borrow - argument requires that `*codewords` is borrowed for `'a`
+        lookup_table,
+        huffman_tree,
+    );
+
+    // append the previously saved current sequence
+    codewords.extend(&mut cur_sequence); // second mutable borrow occurs here
+    codewords.push(true); // third mutable borrow occurs here
+    traverse_tree(
+        cur_node.right as usize,
+        height + 1,
+        codewords, // fourth mutable borrow occurs here
+        lookup_table,
+        huffman_tree,
+    );
 }
 
 #[inline]

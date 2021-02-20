@@ -1,5 +1,5 @@
 #[readonly::make]
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct HufTreeNode {
     pub val: u8,
     pub freq: usize,
