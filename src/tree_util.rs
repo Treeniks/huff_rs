@@ -10,11 +10,27 @@ pub struct HufTreeNode {
 impl HufTreeNode {
     #[inline]
     pub fn new(val: u8, freq: usize, left: i16, right: i16) -> Self {
-        HufTreeNode {
+        Self {
             val,
             freq,
             left,
             right,
         }
     }
+
+    #[inline]
+    pub fn to_short(self) -> ShortHufTreeNode {
+        ShortHufTreeNode {
+            val: self.val,
+            left: self.left,
+            right: self.right,
+        }
+    }
+}
+
+#[repr(packed(1))]
+pub struct ShortHufTreeNode {
+    val: u8,
+    left: i16,
+    right: i16,
 }

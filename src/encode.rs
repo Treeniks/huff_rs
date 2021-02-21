@@ -1,9 +1,9 @@
-use crate::tree_util::HufTreeNode;
+use crate::tree_util::{HufTreeNode, ShortHufTreeNode};
 use ahash::AHashMap;
 use bitvec::prelude::*;
 use std::collections::VecDeque;
 
-pub fn encode(input_data: &[u8]) -> (Vec<HufTreeNode>, BitVec) {
+pub fn encode(input_data: &[u8]) -> (Vec<ShortHufTreeNode>, BitVec) {
     // frequency analysis
     let mut frequency_map: AHashMap<u8, usize> = AHashMap::new();
 
@@ -30,7 +30,12 @@ pub fn encode(input_data: &[u8]) -> (Vec<HufTreeNode>, BitVec) {
         let (elem1, freq1) = take_less(&mut queue1, &mut queue2, &huffman_tree);
         let (elem2, freq2) = take_less(&mut queue1, &mut queue2, &huffman_tree);
 
-        huffman_tree.push(HufTreeNode::new(0, freq1 + freq2, elem1 as i16, elem2 as i16));
+        huffman_tree.push(HufTreeNode::new(
+            0,
+            freq1 + freq2,
+            elem1 as i16,
+            elem2 as i16,
+        ));
 
         queue2.push_back(j);
         j += 1;
@@ -58,7 +63,9 @@ pub fn encode(input_data: &[u8]) -> (Vec<HufTreeNode>, BitVec) {
         bitsequence.extend_from_bitslice(slice);
     }
 
-    (huffman_tree, bitsequence)
+    let short_tree: Vec<ShortHufTreeNode> =
+        huffman_tree.iter().map(|node| node.to_short()).collect();
+    (short_tree, bitsequence)
 }
 
 fn traverse_tree(
