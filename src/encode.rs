@@ -64,7 +64,7 @@ pub fn encode(input_data: &[u8]) -> (Vec<HufTreeNode>, BitVec) {
 fn traverse_tree(
     cur_index: usize,
     height: usize,
-    codewords: &mut bitvec::prelude::BitVec,
+    codewords: &mut BitVec,
     lookup_table: &mut AHashMap<u8, (usize, usize)>,
     huffman_tree: &[HufTreeNode],
 ) {
