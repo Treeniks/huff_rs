@@ -21,6 +21,8 @@ unsafe fn slice_as_u8_slice<T: Sized>(x: &[T]) -> &[u8] {
     )
 }
 
+use bitvec::prelude::*;
+
 fn main() {
     let args: Vec<String> = env::args().collect();
 
@@ -36,11 +38,14 @@ fn main() {
     let mut output_file = OpenOptions::new()
         .create(true)
         .write(true)
+        .truncate(true)
         .open(output_filename)
         .unwrap();
 
-    output_file.write(unsafe { any_as_u8_slice(&input_data.len()) });
-    output_file.write(unsafe { any_as_u8_slice(&(result.0.len() as u16)) });
-    output_file.write(unsafe { slice_as_u8_slice(&result.0) });
+    output_file.write_all(unsafe { any_as_u8_slice(&input_data.len()) }); // original file's length
+    output_file.write_all(unsafe { any_as_u8_slice(&(result.0.len() as u16)) }); // size of huffman_tree
+    output_file.write_all(unsafe { slice_as_u8_slice(&result.0) }); // huffman_tree
+    output_file.write_all(&[result.2]); // fillup
+    output_file.write_all(result.1.as_raw_slice()); // bitsequence
     // println!("{:?}", result.1);
 }

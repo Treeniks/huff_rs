@@ -3,7 +3,7 @@ use ahash::AHashMap;
 use bitvec::prelude::*;
 use std::collections::VecDeque;
 
-pub fn encode(input_data: &[u8]) -> (Vec<ShortHufTreeNode>, BitVec) {
+pub fn encode(input_data: &[u8]) -> (Vec<ShortHufTreeNode>, BitVec<Lsb0, u8>, u8) {
     // frequency analysis
     let mut frequency_map: AHashMap<u8, usize> = AHashMap::new();
 
@@ -54,7 +54,7 @@ pub fn encode(input_data: &[u8]) -> (Vec<ShortHufTreeNode>, BitVec) {
     );
 
     // encoding original data
-    let mut bitsequence: BitVec = BitVec::new();
+    let mut bitsequence: BitVec<Lsb0, u8> = BitVec::new();
 
     for c in input_data {
         let indices = lookup_table.get(c).unwrap();
@@ -63,9 +63,16 @@ pub fn encode(input_data: &[u8]) -> (Vec<ShortHufTreeNode>, BitVec) {
         bitsequence.extend_from_bitslice(slice);
     }
 
+    let actual_len = bitsequence.len();
+    let aligned_len = (actual_len + 7) & (-8isize) as usize;
+    let fillup = aligned_len - actual_len;
+    bitsequence.resize(aligned_len, false);
+    bitsequence.shift_right(fillup);
+
     let short_tree: Vec<ShortHufTreeNode> =
         huffman_tree.iter().map(|node| node.to_short()).collect();
-    (short_tree, bitsequence)
+
+    (short_tree, bitsequence, fillup as u8)
 }
 
 fn traverse_tree(
