@@ -49,3 +49,23 @@ fn main() {
     output_file.write_all(result.1.as_raw_slice()); // bitsequence
     // println!("{:?}", result.1);
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::encode::encode;
+    use crate::decode::decode;
+
+    #[test]
+    fn encode_decode_same_result() {
+        let data = b"sesamstrasse";
+
+        let encode_result = encode(data);
+        let tree = encode_result.0;
+        let bitsequence = encode_result.1;
+        let fillup = encode_result.2;
+
+        let decode_result = decode(&tree, &bitsequence[fillup as usize..]);
+
+        assert_eq!(&data[..], &decode_result);
+    }
+}

@@ -28,9 +28,11 @@ impl HufTreeNode {
     }
 }
 
+#[readonly::make]
+#[derive(Debug, Clone, Copy)]
 #[repr(packed(1))]
 pub struct ShortHufTreeNode {
-    val: u8,
-    left: i16,
-    right: i16,
+    pub val: u8,
+    pub left: i16,
+    pub right: i16,
 }
