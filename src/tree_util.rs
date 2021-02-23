@@ -28,6 +28,13 @@ impl HufTreeNode {
     }
 }
 
+impl ShortHufTreeNode {
+    #[inline]
+    pub fn new(val: u8, left: i16, right: i16) -> Self {
+        Self { val, left, right }
+    }
+}
+
 #[readonly::make]
 #[derive(Debug, Clone, Copy)]
 #[repr(packed(1))]
