@@ -3,7 +3,7 @@ use ahash::AHashMap;
 use bitvec::prelude::*;
 use std::collections::VecDeque;
 
-pub fn encode(input_data: &[u8]) -> (Vec<ShortHufTreeNode>, BitVec<Lsb0, u8>, u8) {
+pub fn encode_data(input_data: &[u8]) -> (Vec<ShortHufTreeNode>, BitVec<Lsb0, u8>, u8) {
     // frequency analysis
     let mut frequency_map: AHashMap<u8, usize> = AHashMap::new();
 
