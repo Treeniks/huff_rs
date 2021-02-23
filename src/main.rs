@@ -39,7 +39,7 @@ fn write_node(output_file: &mut File, node: ShortHufTreeNode) -> Result<(), std:
 
 fn read_tree(input_file: &mut File, size: u16) -> Result<Vec<ShortHufTreeNode>, std::io::Error> {
     let mut result = Vec::new();
-    for i in 0..size {
+    for _i in 0..size {
         let val = input_file.read_u8()?;
         let left = input_file.read_i16::<LE>()?;
         let right = input_file.read_i16::<LE>()?;
@@ -48,13 +48,27 @@ fn read_tree(input_file: &mut File, size: u16) -> Result<Vec<ShortHufTreeNode>, 
     Ok(result)
 }
 
+fn create_output_filename(input_filename: &str, extension: &str) -> String {
+    // TODO replace with `rsplit_once` once it's not nightly-only anymore
+    // https://github.com/rust-lang/rust/issues/74773
+
+    let v: Vec<&str> = input_filename.split(".").collect();
+    let mut output_filename = v[..v.len() - 1].join(".");
+    output_filename.push('.');
+    output_filename.push_str(extension);
+    return output_filename;
+}
+
 fn main() -> Result<(), std::io::Error> {
     let yaml = load_yaml!("cli.yml");
     let matches = App::from_yaml(yaml).get_matches();
 
     if let Some(matches) = matches.subcommand_matches("encode") {
         let input_filename = matches.value_of("input").unwrap();
-        let output_filename = matches.value_of("output").unwrap_or("output.huf");
+        let output_filename = match matches.value_of("output") {
+            Some(output_filename) => output_filename.to_string(),
+            None => create_output_filename(input_filename, "huf"),
+        };
 
         let input_data = fs::read(input_filename)?;
         let result = encode(&input_data);
@@ -70,7 +84,10 @@ fn main() -> Result<(), std::io::Error> {
         output_file.write_all(result.1.as_raw_slice())?; // bitsequence
     } else if let Some(matches) = matches.subcommand_matches("decode") {
         let input_filename = matches.value_of("input").unwrap();
-        let output_filename = matches.value_of("output").unwrap_or("output.txt");
+        let output_filename = match matches.value_of("output") {
+            Some(output_filename) => output_filename.to_string(),
+            None => create_output_filename(input_filename, "txt"),
+        };
 
         let mut input_file = OpenOptions::new().read(true).open(input_filename).unwrap();
 
