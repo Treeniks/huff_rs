@@ -112,6 +112,7 @@ dependencies = [
  "byteorder",
  "clap",
  "readonly",
+ "throbber",
 ]
 
 [[package]]
@@ -192,6 +193,12 @@ checksum = "d326610f408c7a4eb6f51c37c330e496b08506c9457c9d34287ecc38809fb060"
 dependencies = [
  "unicode-width",
 ]
+
+[[package]]
+name = "throbber"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a8b41a15e7f5bcb09a45cc9ebc3c1eec6861cf3581ba9be536eab75c1da8abdd"
 
 [[package]]
 name = "unicode-width"

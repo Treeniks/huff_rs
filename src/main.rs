@@ -1,6 +1,5 @@
 mod decode;
 mod encode;
-mod loading_cli;
 mod tree_util;
 
 use decode::decode_data;
@@ -9,12 +8,11 @@ use encode::encode_data;
 use std::fs::{self, File, OpenOptions};
 use std::io::{Read, Write};
 
-use std::sync::mpsc;
-use std::thread;
-
 use tree_util::ShortHufTreeNode;
 
 use bitvec::prelude::*;
+
+use throbber::Throbber;
 
 #[macro_use]
 extern crate clap;
@@ -64,6 +62,8 @@ fn main() -> Result<(), std::io::Error> {
     let yaml = load_yaml!("cli.yml");
     let matches = App::from_yaml(yaml).get_matches();
 
+    let mut throbber = Throbber::new();
+
     if let Some(matches) = matches.subcommand_matches("encode") {
         let input_filename = matches.value_of("input").unwrap();
         let output_filename = match matches.value_of("output") {
@@ -71,9 +71,7 @@ fn main() -> Result<(), std::io::Error> {
             None => create_output_filename(input_filename, "huf"),
         };
 
-        let (tx, rx) = mpsc::channel();
-        let msg = format!("Encoding {}", input_filename);
-        let anim = thread::spawn(move || loading_cli::loading_animation(rx, msg));
+        throbber.start_with_msg(format!("Encoding {}", input_filename));
 
         let input_data = fs::read(input_filename)?;
         let result = encode_data(&input_data);
@@ -84,22 +82,16 @@ fn main() -> Result<(), std::io::Error> {
             .truncate(true)
             .open(&output_filename)?;
 
-        let succ_msg = format!("✔ Encoded {}", input_filename);
-        let _ = tx.send(succ_msg);
-        anim.join().unwrap();
+        throbber.success(format!("Encoded {}", input_filename));
 
-        let (tx, rx) = mpsc::channel();
-        let msg = format!("Output: {}", output_filename);
-        let anim = thread::spawn(move || loading_cli::loading_animation(rx, msg));
+        throbber.start_with_msg(format!("Output {}", output_filename));
 
         output_file.write_u16::<LE>(result.0.len() as u16)?; // huffmen_tree size - cannot be larger than a u16
         write_tree(&mut output_file, &result.0)?; // huffman_tree
         output_file.write_u8(result.2)?; // fillup
         output_file.write_all(result.1.as_raw_slice())?; // bitsequence
 
-        let succ_msg = format!("✔ Output: {}", output_filename);
-        let _ = tx.send(succ_msg);
-        anim.join().unwrap();
+        throbber.success(format!("Output: {}", output_filename));
     } else if let Some(matches) = matches.subcommand_matches("decode") {
         let input_filename = matches.value_of("input").unwrap();
         let output_filename = match matches.value_of("output") {
@@ -107,9 +99,7 @@ fn main() -> Result<(), std::io::Error> {
             None => create_output_filename(input_filename, "txt"),
         };
 
-        let (tx, rx) = mpsc::channel();
-        let msg = format!("Decoding {}", input_filename);
-        let anim = thread::spawn(move || loading_cli::loading_animation(rx, msg));
+        throbber.start_with_msg(format!("Decoding {}", input_filename));
 
         let mut input_file = OpenOptions::new().read(true).open(input_filename)?;
 
@@ -123,13 +113,9 @@ fn main() -> Result<(), std::io::Error> {
 
         let result = decode_data(&huffman_tree, &bitsequence[fillup as usize..]);
 
-        let succ_msg = format!("✔ Encoded {}", input_filename);
-        let _ = tx.send(succ_msg);
-        anim.join().unwrap();
+        throbber.success(format!("Encoded {}", input_filename));
 
-        let (tx, rx) = mpsc::channel();
-        let msg = format!("Output: {}", output_filename);
-        let anim = thread::spawn(move || loading_cli::loading_animation(rx, msg));
+        throbber.start_with_msg(format!("Output {}", output_filename));
 
         let mut output_file = OpenOptions::new()
             .create(true)
@@ -139,10 +125,9 @@ fn main() -> Result<(), std::io::Error> {
 
         output_file.write_all(&result)?;
 
-        let succ_msg = format!("✔ Output: {}", output_filename);
-        let _ = tx.send(succ_msg);
-        anim.join().unwrap();
+        throbber.success(format!("Output: {}", output_filename));
     }
+    throbber.end();
 
     Ok(())
 }

@@ -12,3 +12,4 @@ bitvec = "0.21.0"
 readonly = "0.2.0"
 byteorder = "1.4.2"
 clap = {version = "2.33.3", features = ["yaml"]}
+throbber = "0.1"
