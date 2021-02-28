@@ -58,78 +58,92 @@ fn create_output_filename(input_filename: &str, extension: &str) -> String {
     return output_filename;
 }
 
-fn main() -> Result<(), std::io::Error> {
+fn encode_file(matches: &clap::ArgMatches, throbber: &mut Throbber) -> Result<(), std::io::Error> {
+    let input_filename = matches.value_of("input").unwrap();
+    let output_filename = match matches.value_of("output") {
+        Some(output_filename) => output_filename.to_string(),
+        None => create_output_filename(input_filename, "huf"),
+    };
+
+    throbber.start_with_msg(format!("Encoding {}", input_filename));
+
+    let input_data = fs::read(input_filename)?;
+    let result = encode_data(&input_data);
+
+    let mut output_file = OpenOptions::new()
+        .create(true)
+        .write(true)
+        .truncate(true)
+        .open(&output_filename)?;
+
+    throbber.success(format!("Encoded {}", input_filename));
+
+    throbber.start_with_msg(format!("Output {}", output_filename));
+
+    output_file.write_u16::<LE>(result.0.len() as u16)?; // huffmen_tree size - cannot be larger than a u16
+    write_tree(&mut output_file, &result.0)?; // huffman_tree
+    output_file.write_u8(result.2)?; // fillup
+    output_file.write_all(result.1.as_raw_slice())?; // bitsequence
+
+    throbber.success(format!("Output: {}", output_filename));
+
+    Ok(())
+}
+
+fn decode_file(matches: &clap::ArgMatches, throbber: &mut Throbber) -> Result<(), std::io::Error> {
+    let input_filename = matches.value_of("input").unwrap();
+    let output_filename = match matches.value_of("output") {
+        Some(output_filename) => output_filename.to_string(),
+        None => create_output_filename(input_filename, "txt"),
+    };
+
+    throbber.start_with_msg(format!("Decoding {}", input_filename));
+
+    let mut input_file = OpenOptions::new().read(true).open(input_filename)?;
+
+    let huffman_tree_size = input_file.read_u16::<LE>()?;
+    let huffman_tree = read_tree(&mut input_file, huffman_tree_size)?;
+    let fillup = input_file.read_u8()?;
+
+    let mut bitsequence = Vec::new();
+    input_file.read_to_end(&mut bitsequence)?;
+    let bitsequence = BitVec::from_vec(bitsequence);
+
+    let result = decode_data(&huffman_tree, &bitsequence[fillup as usize..]);
+
+    throbber.success(format!("Encoded {}", input_filename));
+
+    throbber.start_with_msg(format!("Output {}", output_filename));
+
+    let mut output_file = OpenOptions::new()
+        .create(true)
+        .write(true)
+        .truncate(true)
+        .open(&output_filename)?;
+
+    output_file.write_all(&result)?;
+
+    throbber.success(format!("Output: {}", output_filename));
+
+    Ok(())
+}
+
+fn main() {
     let yaml = load_yaml!("cli.yml");
     let matches = App::from_yaml(yaml).get_matches();
 
     let mut throbber = Throbber::new();
 
     if let Some(matches) = matches.subcommand_matches("encode") {
-        let input_filename = matches.value_of("input").unwrap();
-        let output_filename = match matches.value_of("output") {
-            Some(output_filename) => output_filename.to_string(),
-            None => create_output_filename(input_filename, "huf"),
-        };
-
-        throbber.start_with_msg(format!("Encoding {}", input_filename));
-
-        let input_data = fs::read(input_filename)?;
-        let result = encode_data(&input_data);
-
-        let mut output_file = OpenOptions::new()
-            .create(true)
-            .write(true)
-            .truncate(true)
-            .open(&output_filename)?;
-
-        throbber.success(format!("Encoded {}", input_filename));
-
-        throbber.start_with_msg(format!("Output {}", output_filename));
-
-        output_file.write_u16::<LE>(result.0.len() as u16)?; // huffmen_tree size - cannot be larger than a u16
-        write_tree(&mut output_file, &result.0)?; // huffman_tree
-        output_file.write_u8(result.2)?; // fillup
-        output_file.write_all(result.1.as_raw_slice())?; // bitsequence
-
-        throbber.success(format!("Output: {}", output_filename));
+        if let Err(e) = encode_file(&matches, &mut throbber) {
+            throbber.fail(e.to_string());
+        }
     } else if let Some(matches) = matches.subcommand_matches("decode") {
-        let input_filename = matches.value_of("input").unwrap();
-        let output_filename = match matches.value_of("output") {
-            Some(output_filename) => output_filename.to_string(),
-            None => create_output_filename(input_filename, "txt"),
-        };
-
-        throbber.start_with_msg(format!("Decoding {}", input_filename));
-
-        let mut input_file = OpenOptions::new().read(true).open(input_filename)?;
-
-        let huffman_tree_size = input_file.read_u16::<LE>()?;
-        let huffman_tree = read_tree(&mut input_file, huffman_tree_size)?;
-        let fillup = input_file.read_u8()?;
-
-        let mut bitsequence = Vec::new();
-        input_file.read_to_end(&mut bitsequence)?;
-        let bitsequence = BitVec::from_vec(bitsequence);
-
-        let result = decode_data(&huffman_tree, &bitsequence[fillup as usize..]);
-
-        throbber.success(format!("Encoded {}", input_filename));
-
-        throbber.start_with_msg(format!("Output {}", output_filename));
-
-        let mut output_file = OpenOptions::new()
-            .create(true)
-            .write(true)
-            .truncate(true)
-            .open(&output_filename)?;
-
-        output_file.write_all(&result)?;
-
-        throbber.success(format!("Output: {}", output_filename));
+        if let Err(e) = decode_file(&matches, &mut throbber) {
+            throbber.fail(e.to_string());
+        }
     }
     throbber.end();
-
-    Ok(())
 }
 
 #[cfg(test)]
