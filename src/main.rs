@@ -62,7 +62,7 @@ fn encode_file(matches: &clap::ArgMatches, throbber: &mut Throbber) -> Result<()
     let input_filename = matches.value_of("input").unwrap();
     let output_filename = match matches.value_of("output") {
         Some(output_filename) => output_filename.to_string(),
-        None => create_output_filename(input_filename, "huf"),
+        None => create_output_filename(input_filename, "huff"),
     };
 
     throbber.start_with_msg(format!("Encoding {}", input_filename));

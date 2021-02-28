@@ -1,4 +1,4 @@
-name: huffman_rs
+name: huff_rs
 version: "1.0"
 author: Thomas Lindae <thomas.lindae@in.tum.de>
 about: Compresses files with huffman encoding
