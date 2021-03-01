@@ -58,13 +58,11 @@ fn create_output_filename(input_filename: &str, extension: &str) -> String {
     return output_filename;
 }
 
-fn encode_file(matches: &clap::ArgMatches, throbber: &mut Throbber) -> Result<(), std::io::Error> {
-    let input_filename = matches.value_of("input").unwrap();
-    let output_filename = match matches.value_of("output") {
-        Some(output_filename) => output_filename.to_string(),
-        None => create_output_filename(input_filename, "huff"),
-    };
-
+fn encode_file(
+    input_filename: &str,
+    output_filename: &str,
+    throbber: &mut Throbber,
+) -> Result<(), std::io::Error> {
     throbber.start_with_msg(format!("Encoding {}", input_filename));
 
     let input_data = fs::read(input_filename)?;
@@ -90,13 +88,11 @@ fn encode_file(matches: &clap::ArgMatches, throbber: &mut Throbber) -> Result<()
     Ok(())
 }
 
-fn decode_file(matches: &clap::ArgMatches, throbber: &mut Throbber) -> Result<(), std::io::Error> {
-    let input_filename = matches.value_of("input").unwrap();
-    let output_filename = match matches.value_of("output") {
-        Some(output_filename) => output_filename.to_string(),
-        None => create_output_filename(input_filename, "txt"),
-    };
-
+fn decode_file(
+    input_filename: &str,
+    output_filename: &str,
+    throbber: &mut Throbber,
+) -> Result<(), std::io::Error> {
     throbber.start_with_msg(format!("Decoding {}", input_filename));
 
     let mut input_file = OpenOptions::new().read(true).open(input_filename)?;
@@ -134,12 +130,24 @@ fn main() {
 
     let mut throbber = Throbber::new();
 
+    let input_filename = matches.value_of("input").unwrap();
+
     if let Some(matches) = matches.subcommand_matches("encode") {
-        if let Err(e) = encode_file(&matches, &mut throbber) {
+        let output_filename = match matches.value_of("output") {
+            Some(output_filename) => output_filename.to_string(),
+            None => create_output_filename(input_filename, "huff"),
+        };
+
+        if let Err(e) = encode_file(input_filename, &output_filename, &mut throbber) {
             throbber.fail(e.to_string());
         }
     } else if let Some(matches) = matches.subcommand_matches("decode") {
-        if let Err(e) = decode_file(&matches, &mut throbber) {
+        let output_filename = match matches.value_of("output") {
+            Some(output_filename) => output_filename.to_string(),
+            None => create_output_filename(input_filename, "txt"),
+        };
+
+        if let Err(e) = decode_file(input_filename, &output_filename, &mut throbber) {
             throbber.fail(e.to_string());
         }
     }
@@ -162,6 +170,6 @@ mod tests {
 
         let decode_result = decode_data(&tree, &bitsequence[fillup as usize..]);
 
-        assert_eq!(&data[..], &decode_result);
+        assert_eq!(&data[..], &decode_result[..]);
     }
 }

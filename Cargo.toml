@@ -1,6 +1,6 @@
 [package]
 name = "huff_rs"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["Thomas Lindae <thomas.lindae@in.tum.de>"]
 edition = "2018"
 description = "Encode and decode files with Huffman coding."
