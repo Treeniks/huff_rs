@@ -3,6 +3,10 @@ name = "huff_rs"
 version = "0.1.0"
 authors = ["thomas"]
 edition = "2018"
+description = "Encode and decode files with Huffman coding."
+license = "MIT"
+repository = "https://github.com/Treeniks/huff_rs"
+keywords = ["huffman", "huffman_coding", "compression", "decompression"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
