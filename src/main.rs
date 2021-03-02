@@ -130,9 +130,8 @@ fn main() {
 
     let mut throbber = Throbber::new();
 
-    let input_filename = matches.value_of("input").unwrap();
-
     if let Some(matches) = matches.subcommand_matches("encode") {
+        let input_filename = matches.value_of("input").unwrap();
         let output_filename = match matches.value_of("output") {
             Some(output_filename) => output_filename.to_string(),
             None => create_output_filename(input_filename, "huff"),
@@ -142,6 +141,7 @@ fn main() {
             throbber.fail(e.to_string());
         }
     } else if let Some(matches) = matches.subcommand_matches("decode") {
+        let input_filename = matches.value_of("input").unwrap();
         let output_filename = match matches.value_of("output") {
             Some(output_filename) => output_filename.to_string(),
             None => create_output_filename(input_filename, "txt"),
