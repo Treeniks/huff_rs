@@ -78,7 +78,7 @@ fn encode_file(
 
     throbber.start_with_msg(format!("Output {}", output_filename));
 
-    output_file.write_u16::<LE>(result.0.len() as u16)?; // huffmen_tree size - cannot be larger than a u16
+    output_file.write_u16::<LE>(result.0.len() as u16)?; // huffman_tree size - cannot be larger than a u16
     write_tree(&mut output_file, &result.0)?; // huffman_tree
     output_file.write_u8(result.2)?; // fillup
     output_file.write_all(result.1.as_raw_slice())?; // bitsequence
