@@ -1,19 +1,17 @@
 [package]
 name = "huff_rs"
-version = "0.1.3"
+version = "0.2.0"
 authors = ["Thomas Lindae <thomas.lindae@in.tum.de>"]
-edition = "2018"
+edition = "2024"
 description = "Encode and decode files with Huffman coding."
 license = "MIT"
 repository = "https://github.com/Treeniks/huff_rs"
 keywords = ["huffman", "huffman_coding", "compression", "decompression"]
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
-ahash = "0.7.0"
-bitvec = "0.21.0"
+ahash = "0.8.12"
+bitvec = "1.0.1"
 readonly = "0.2.0"
 byteorder = "1.4.2"
-clap = {version = "2.33.3", features = ["yaml"]}
+clap = { version = "4.5.51", features = ["derive"] }
 throbber = "0.1"

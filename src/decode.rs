@@ -2,7 +2,7 @@ use crate::tree_util::ShortHufTreeNode;
 
 use bitvec::prelude::*;
 
-pub fn decode_data(tree: &[ShortHufTreeNode], input_data: &BitSlice<Lsb0, u8>) -> Vec<u8> {
+pub fn decode_data(tree: &[ShortHufTreeNode], input_data: &BitSlice<u8, Lsb0>) -> Vec<u8> {
     let mut result = Vec::new();
 
     let root_node = tree[tree.len() - 1];

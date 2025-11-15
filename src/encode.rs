@@ -3,7 +3,7 @@ use ahash::AHashMap;
 use bitvec::prelude::*;
 use std::collections::VecDeque;
 
-pub fn encode_data(input_data: &[u8]) -> (Vec<ShortHufTreeNode>, BitVec<Lsb0, u8>, u8) {
+pub fn encode_data(input_data: &[u8]) -> (Vec<ShortHufTreeNode>, BitVec<u8, Lsb0>, u8) {
     // frequency analysis
     let mut frequency_map: AHashMap<u8, usize> = AHashMap::new();
 
@@ -54,7 +54,7 @@ pub fn encode_data(input_data: &[u8]) -> (Vec<ShortHufTreeNode>, BitVec<Lsb0, u8
     );
 
     // encoding original data
-    let mut bitsequence: BitVec<Lsb0, u8> = BitVec::new();
+    let mut bitsequence: BitVec<u8, Lsb0> = BitVec::new();
 
     for c in input_data {
         let indices = lookup_table.get(c).unwrap();

@@ -6,26 +6,6 @@
 
 I created this for fun after having to implement Huffman coding for a university project. It utilizes the [bitvec](https://crates.io/crates/bitvec) crate to create the bitsequences. The performance of this program is honestly pretty bad. The file format for the compressed files is something arbitrary I came up with.
 
-## Help
-
-```
-huff_rs 1.0
-Thomas Lindae <thomas.lindae@in.tum.de>
-Compresses files with huffman encoding
-
-USAGE:
-    huff_rs <SUBCOMMAND>
-
-FLAGS:
-    -h, --help       Prints help information
-    -V, --version    Prints version information
-
-SUBCOMMANDS:
-    decode    Decodes the specified file
-    encode    Encodes the specified file
-    help      Prints this message or the help of the given subcommand(s)
-```
-
 ## Building
 
 ```sh
