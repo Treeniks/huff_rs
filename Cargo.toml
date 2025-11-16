@@ -1,6 +1,6 @@
 [package]
 name = "huff_rs"
-version = "0.2.0"
+version = "0.2.1"
 authors = ["Thomas Lindae <thomas.lindae@in.tum.de>"]
 edition = "2024"
 description = "Encode and decode files with Huffman coding."
@@ -14,4 +14,4 @@ bitvec = "1.0.1"
 readonly = "0.2.0"
 byteorder = "1.4.2"
 clap = { version = "4.5.51", features = ["derive"] }
-throbber = "0.1"
+throbber = "1.0"

@@ -37,7 +37,7 @@ struct CommandArgs {
 fn main() {
     let cli = Cli::parse();
 
-    let mut throbber = Throbber::new();
+    let mut throbber = Throbber::default();
 
     match cli.command {
         Commands::Encode(CommandArgs {
@@ -70,8 +70,6 @@ fn main() {
             }
         }
     }
-
-    throbber.end();
 }
 
 fn encode_file(

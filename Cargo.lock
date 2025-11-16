@@ -161,7 +161,7 @@ checksum = "2304e00983f87ffb38b55b444b5e3b60a884b5d30c0fca7d82fe33449bbe55ea"
 
 [[package]]
 name = "huff_rs"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "ahash",
  "bitvec",
@@ -272,9 +272,9 @@ checksum = "55937e1799185b12863d447f42597ed69d9928686b8d88a1df17376a097d8369"
 
 [[package]]
 name = "throbber"
-version = "0.1.4"
+version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fa679cdc0bc079431af2e764d22d46b261a21349b6fd9595749ba686d2170f05"
+checksum = "f6240e8c9580939c56992ece5d5f6540df3f8e60003304a0d0010f02b580b76a"
 
 [[package]]
 name = "unicode-ident"
